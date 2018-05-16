@@ -643,7 +643,7 @@ int sysfs_devno_is_lvm_private(dev_t devno, char **uuid)
 	pc = ul_new_sysfs_path(devno, NULL, NULL);
 	if (!pc)
 		goto done;
-	if (ul_path_read_string(pc, &id, "dm/uuid") != 0)
+	if (ul_path_read_string(pc, &id, "dm/uuid") <= 0)
 		goto done;
 
 	/* Private LVM devices use "LVM-<uuid>-<name>" uuid format (important
