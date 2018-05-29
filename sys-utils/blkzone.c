@@ -114,8 +114,8 @@ static int init_device(struct blkzone_control *ctl, int mode)
  */
 static unsigned long blkdev_chunk_sectors(const char *dname)
 {
-	struct sysfs_cxt cxt = UL_SYSFSCXT_EMPTY;
-	dev_t devno = sysfs_devname_to_devno(dname, NULL);
+	struct path_cxt *pc;
+	dev_t devno = sysfs_devname_to_devno(dname);
 	int major_no = major(devno);
 	int block_no = minor(devno) & ~0x0f;
 	uint64_t sz;
@@ -127,12 +127,13 @@ static unsigned long blkdev_chunk_sectors(const char *dname)
 	 * component.
 	 */
 	devno = makedev(major_no, block_no);
-	if (sysfs_init(&cxt, devno, NULL))
+	pc = ul_new_sysfs_path(devno, NULL, NULL);
+	if (!pc)
 		return 0;
 
-	rc = sysfs_read_u64(&cxt, "queue/chunk_sectors", &sz);
+	rc = ul_path_read_u64(pc, &sz, "queue/chunk_sectors");
 
-	sysfs_deinit(&cxt);
+	ul_unref_path(pc);
 	return rc == 0 ? sz : 0;
 }
 
